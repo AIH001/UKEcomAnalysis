@@ -1,0 +1,8 @@
+# Ignore all CSV files
+*.csv
+
+# Ignore all XML files
+*.xml
+
+# Ignore all IML files
+*.iml
