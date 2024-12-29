@@ -1,0 +1,11 @@
+Cluster 1 represents the least valuable customer. These customers shop the least
+frequent and the least recent. Lowest monetary
+
+Cluster 3 - Moderate recency, low to moderate frequency. Low monetary
+
+Cluster 0 - low recency, low to moderate frequency. Low to moderate monetary
+
+Cluster 2 - largest cluster. Might benefit from its own
+separate clustering. (research decision tree clustering)
+Represents customers the most recent and most frequent.
+Highest valuable customers and highest monetary
