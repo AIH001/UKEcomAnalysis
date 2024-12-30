@@ -5,6 +5,13 @@ from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
+from statsmodels.tsa.seasonal import seasonal_decompose
+from statsmodels.tsa.stattools import adfuller
+from statsmodels.tsa.arima.model import ARIMA
+import numpy as np
+from scipy.fft import fft
+from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
+
 # fetch dataset
 online_retail = fetch_ucirepo(id=352)
 ids = online_retail.data['ids']
@@ -77,12 +84,6 @@ rfm_normalized['Cluster'] = kmeans.fit_predict(rfm_normalized)
 # Add cluster labels to the original dataset
 rfm_filtered['Cluster'] = rfm_normalized['Cluster']
 
-print(rfm_filtered.index.equals(rfm_normalized.index))  # Should return True
-
-sns.pairplot(rfm_normalized, hue='Cluster', palette='tab10')
-plt.suptitle("RFM Clusters")
-plt.show()
-
 # Create a 3D scatter plot
 fig = plt.figure(figsize=(10, 7))
 ax = fig.add_subplot(111, projection='3d')
@@ -147,15 +148,6 @@ cluster_key_metrics = rfm_filtered.groupby('Cluster')[key_metrics].mean()
 print("Key Metrics for Each Cluster:")
 print(cluster_key_metrics)
 
-# Plot the mean values of key metrics
-cluster_key_metrics.plot(kind='bar', figsize=(10, 6))
-plt.title("Average Recency, Frequency, and Monetary by Cluster")
-plt.ylabel("Average Value")
-plt.xlabel("Cluster")
-plt.xticks(rotation=0)
-plt.legend(title="Metrics")
-plt.show()
-
 plt.figure(figsize=(15, 5))
 for i, metric in enumerate(key_metrics, 1):
     plt.subplot(1, 3, i)
@@ -164,16 +156,113 @@ for i, metric in enumerate(key_metrics, 1):
 plt.tight_layout()
 plt.show()
 
-# Aggregate by day
-time_series = df.groupby(df['InvoiceDate'].dt.date)['Revenue'].sum()
-
-# Alternatively, resample for regular intervals
+# resample data by invoiceData for regular daily intervals
 time_series = df.set_index('InvoiceDate')['Revenue'].resample('D').sum()  # 'D' = daily, 'W' = weekly, 'M' = monthly
-print(time_series.head())
 
+# plot the time series
 plt.figure(figsize=(12, 6))
 time_series.plot()
 plt.title("Revenue Over Time")
 plt.xlabel("Date")
 plt.ylabel("Revenue")
 plt.show()
+
+# Decompose the time series
+decomposition = seasonal_decompose(time_series, model='additive', period=30)  # Adjust period for monthly or seasonal data
+
+# Analyze the components
+trend = decomposition.trend
+seasonal = decomposition.seasonal
+residual = decomposition.resid
+
+# Check the variance of the residuals
+print("Residual Variance:", residual.var())
+print("Trend Variance:", trend.dropna().var())
+print("Seasonal Variance:", seasonal.var())
+
+# Plot decomposition
+decomposition.plot()
+plt.show()
+
+time_series_diff = time_series.diff().dropna()
+
+
+plt.figure(figsize=(12, 6))
+plt.plot(time_series_diff)
+plt.title("Differenced Time Series")
+plt.xlabel("Date")
+plt.ylabel("Differenced Revenue")
+plt.show()
+
+# Fit ARIMA model
+model = ARIMA(time_series, order=(1, 1, 1))  # (p, d, q)
+arima_result = model.fit()
+
+# Summary of the model
+print(arima_result.summary())
+
+# Forecast the next 30 days
+forecast = arima_result.forecast(steps=30)
+print(forecast)
+
+# Plot actual and forecasted values
+plt.figure(figsize=(12, 6))
+plt.plot(time_series, label="Original")
+plt.plot(forecast, label="Forecast", linestyle="--", color="red")
+plt.title("ARIMA Forecast")
+plt.legend()
+plt.show()
+
+# Apply Fourier Transform
+fft_values = fft(time_series.values)
+fft_freqs = np.fft.fftfreq(len(fft_values))
+
+# Plot frequency spectrum
+plt.figure(figsize=(10, 6))
+plt.plot(fft_freqs[1:int(len(fft_freqs)/2)], np.abs(fft_values[1:int(len(fft_values)/2)]))
+plt.title("Frequency Spectrum")
+plt.xlabel("Frequency")
+plt.ylabel("Amplitude")
+plt.show()
+
+plt.figure(figsize=(12, 6))
+plt.plot(time_series, label="Revenue")
+plt.title("Revenue Over Time")
+plt.xlabel("Date")
+plt.ylabel("Revenue")
+plt.legend()
+plt.show()
+
+
+# ACF and PACF plots
+plot_acf(time_series, lags=50, title="ACF Plot")
+plt.show()
+
+plot_pacf(time_series, lags=50, title="PACF Plot")
+plt.show()
+
+# Resample data to weekly and monthly frequency
+time_series_weekly = time_series.resample('W').sum()  # Weekly aggregation
+time_series_monthly = time_series.resample('ME').sum()  # Monthly aggregation
+
+# Plot the two resampled time series
+plt.figure(figsize=(14, 7))
+
+# Weekly Data
+plt.subplot(2, 1, 1)
+plt.plot(time_series_weekly, label='Weekly Aggregation', color='blue')
+plt.title("Weekly Aggregated Revenue")
+plt.ylabel("Revenue")
+plt.legend()
+
+# Monthly Data
+plt.subplot(2, 1, 2)
+plt.plot(time_series_monthly, label='Monthly Aggregation', color='green')
+plt.title("Monthly Aggregated Revenue")
+plt.ylabel("Revenue")
+plt.legend()
+
+plt.tight_layout()
+plt.show()
+
+
