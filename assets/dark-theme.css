@@ -1,0 +1,82 @@
+/* General styling for black/dark background */
+body {
+    background-color: #121212;  /* Black background */
+    color: #e1e1ff;  /* Light purple text */
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* Centered headings */
+h1, h2, h3 {
+    text-align: center;
+    color: #e1e1ff; /* Light purple for headings */
+    margin: 20px 0;
+}
+
+/* Tabs styling */
+.tab {
+    background-color: #1e1e2f;  /* Dark purple for tab background */
+    color: #e1e1ff;  /* Light purple text */
+    border: 1px solid #29293d;  /* Dark border for separation */
+    padding: 10px;
+    text-align: center;
+    border-radius: 5px;
+}
+
+.tab:hover {
+    background-color: #29293d;  /* Slightly lighter purple for hover effect */
+}
+
+.tab-selected {
+    background-color: #5a5a77;  /* Light purple for selected tab */
+    color: #ffffff;  /* White text for selected tab */
+    font-weight: bold;
+}
+
+/* Dropdown styling */
+.Select-menu {
+    background-color: #1e1e2f;  /* Dark purple dropdown background */
+    color: #ffffff;  /* Dropdown text */
+    border: 1px solid #29293d;  /* Subtle border */
+}
+
+/* Styling for graphs */
+.graph-container {
+    background-color: #121212;  /* Black background for graph container */
+    color: #e1e1ff;  /* Light purple text */
+    border: 1px solid #1e1e2f;  /* Dark purple border */
+    border-radius: 8px;
+    padding: 10px;
+}
+
+/* Buttons (optional) */
+.button {
+    background-color: #1e1e2f;  /* Dark purple */
+    color: #e1e1ff;  /* Light purple text */
+    border: 1px solid #29293d;  /* Subtle border */
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.button:hover {
+    background-color: #29293d;  /* Slightly lighter purple */
+}
+
+/* Input fields */
+input {
+    background-color: #1e1e2f;  /* Dark purple background */
+    color: #e1e1ff;  /* Light purple text */
+    border: 1px solid #29293d;
+    padding: 8px;
+    border-radius: 5px;
+}
+
+/* Additional padding for sections */
+.section {
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 1200px; /* Center content with max width */
+}
