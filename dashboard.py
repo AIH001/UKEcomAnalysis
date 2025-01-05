@@ -15,41 +15,139 @@ top_products_data = top_products(df)
 # Initialize Dash app
 app = dash.Dash(__name__)
 
+# Layout with vertical navigation and grid content
 app.layout = html.Div([
-    html.H1("Online Retail Dashboard", style={'textAlign': 'center'}),
+    # Vertical navigation panel
+    html.Div(
+        className="nav-panel",
+        children=[
+            html.H2("Dashboard", style={'marginBottom': '30px'}),
+            html.A("Time Series Analysis", href="#time-series", className="nav-link"),
+            html.A("Sales by Country", href="#sales-country", className="nav-link"),
+            html.A("Top Products", href="#top-products", className="nav-link"),
+            html.A("Customer Clustering", href="#clustering", className="nav-link"),
+        ]
+    ),
 
-    dcc.Tabs([
-        # Tab for Time Series Analysis
-        dcc.Tab(label='Time Series Analysis', className='tab', selected_className='tab-selected', children=[
-            html.H2("Revenue Over Time"),
-            dcc.Graph(figure=px.line(x=time_series.index, y=time_series.values, title="Raw Time Series", template="plotly_dark")),
-            dcc.Graph(figure=px.line(x=trend.index, y=trend.values, title="Trend Component", template="plotly_dark")),
-        ]),
+    # Main content area with grid layout
+    html.Div(
+        className="content",
+        children=[
+            # Raw Time Series Card
+            html.Div(
+                className="card card-large",
+                id="time-series-raw",
+                children=[
+                    html.H3("Raw Time Series"),
+                    html.Div(
+                        className="card-graph",
+                        children=[
+                            dcc.Graph(figure=px.line(
+                                x=time_series.index,
+                                y=time_series.values,
+                                title="Raw Time Series",
+                                template="plotly_dark"
+                            ).update_layout(
+                                paper_bgcolor="#1e1e2f",
+                                plot_bgcolor="#1e1e2f",
+                                margin=dict(r=20, t=40, l=20, b=20)
+                            )),
+                        ]
+                    ),
+                ]
+            ),
 
-        # Tab for Sales by Country
-        dcc.Tab(label='Sales by Country', className='tab', selected_className='tab-selected', children=[
-            html.H2("Sales by Country"),
-            dcc.Graph(figure=px.choropleth(sales_country, locations="Country", locationmode="country names",
-                                           color="Revenue", title="Sales by Country", template="plotly_dark")),
-        ]),
+            # Trend Component Card
+            html.Div(
+                className="card",
+                id="time-series-trend",
+                children=[
+                    html.H3("Trend Component"),
+                    html.Div(
+                        className="card-graph",
+                        children=[
+                            dcc.Graph(figure=px.line(
+                                x=trend.index,
+                                y=trend.values,
+                                title="Trend Component",
+                                template="plotly_dark"
+                            ).update_layout(
+                                paper_bgcolor="#1e1e2f",
+                                plot_bgcolor="#1e1e2f",
+                                margin=dict(r=20, t=40, l=20, b=20)
+                            )),
+                        ]
+                    ),
+                ]
+            ),
 
-        # Tab for Top Products
-        dcc.Tab(label='Top Products', className='tab', selected_className='tab-selected', children=[
-            html.H2("Top Products by Revenue"),
-            dcc.Graph(figure=px.bar(top_products_data, x='Description', y='Revenue', title="Top Products", template="plotly_dark")),
-        ]),
+            # Sales by Country Card
+            html.Div(
+                className="card",
+                id="sales-country",
+                children=[
+                    html.H3("Sales by Country"),
+                    html.Div(
+                        className="card-graph",
+                        children=[
+                            dcc.Graph(figure=px.choropleth(
+                                sales_country, locations="Country",
+                                locationmode="country names", color="Revenue",
+                                title="Sales by Country", template="plotly_dark"
+                            )),
+                        ]
+                    ),
+                ]
+            ),
 
-        # Tab for Clustering
-        dcc.Tab(label='Customer Clustering', className='tab', selected_className='tab-selected', children=[
-            html.H2("Customer Segmentation"),
-            dcc.Graph(figure=px.scatter_3d(rfm_clustered, x='Recency', y='Frequency', z='Monetary', color='Cluster',
-                                           title="3D Clustering Visualization", template="plotly_dark")),
-            html.H3("Cluster Breakdown"),
-            dcc.Graph(figure=px.bar(cluster_summary, x=cluster_summary.index, y='Cluster_size', title="Cluster Sizes",
-                                    template="plotly_dark")),
-        ]),
-    ])
+            # Top Products Card
+            html.Div(
+                className="card",
+                id="top-products",
+                children=[
+                    html.H3("Top Products by Revenue"),
+                    html.Div(
+                        className="card-graph",
+                        children=[
+                            dcc.Graph(figure=px.bar(
+                                top_products_data, x='Description', y='Revenue',
+                                title="Top Products", template="plotly_dark"
+                            )),
+                        ]
+                    ),
+                ]
+            ),
+
+            # Customer Clustering Card (Larger)
+            html.Div(
+                className="card card-large",
+                id="clustering",
+                children=[
+                    html.H3("Customer Clustering"),
+                    html.Div(
+                        className="card-graph",
+                        children=[
+                            dcc.Graph(figure=px.scatter_3d(
+                                rfm_clustered, x='Recency', y='Frequency', z='Monetary',
+                                color='Cluster', title="3D Clustering Visualization", template="plotly_dark"
+                            )),
+                        ]
+                    ),
+                    html.Div(
+                        className="card-graph",
+                        children=[
+                            dcc.Graph(figure=px.bar(
+                                cluster_summary, x=cluster_summary.index, y='Cluster_size',
+                                title="Cluster Sizes", template="plotly_dark"
+                            )),
+                        ]
+                    ),
+                ]
+            ),
+        ]
+    ),
 ])
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
