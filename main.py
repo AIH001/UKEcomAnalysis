@@ -4,6 +4,7 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.cluster import KMeans
 from statsmodels.tsa.seasonal import seasonal_decompose
 import plotly.express as px
+import plotly.graph_objects as go
 
 def load_and_prepare_data():
     from ucimlrepo import fetch_ucirepo
@@ -32,17 +33,24 @@ def calculate_rfm(df):
     rfm_normalized = pd.DataFrame(rfm_normalized, columns=['Recency', 'Frequency', 'Monetary'])
     return rfm_dataset, rfm_normalized
 
-def cluster_rfm(rfm_normalized, num_clusters=4):
+
+def cluster_rfm(rfm_normalized, rfm_dataset, num_clusters=4):
+
     kmeans = KMeans(n_clusters=num_clusters, random_state=42)
-    rfm_normalized['Cluster'] = kmeans.fit_predict(rfm_normalized)
-    return rfm_normalized
+    rfm_normalized['Cluster'] = kmeans.fit_predict(rfm_normalized[['Recency', 'Frequency', 'Monetary']])
 
-def cluster_breakdown(rfm_dataset, rfm_clustered):
-    # Combine clusters with original RFM metrics
-    rfm_combined = rfm_dataset.copy()
-    rfm_combined['Cluster'] = rfm_clustered['Cluster']
+    # Ensure rfm_dataset has CustomerID as a column, not as an index
+    rfm_dataset = rfm_dataset.reset_index()
 
-    # Breakdown metrics
+    # Merge clusters back into the original RFM dataset
+    rfm_combined = pd.merge(rfm_dataset, rfm_normalized[['Cluster']], left_index=True, right_index=True)
+
+    return rfm_combined, rfm_normalized
+
+
+def cluster_breakdown(rfm_combined):
+
+    # Breakdown metrics by Cluster
     cluster_summary = rfm_combined.groupby('Cluster').agg(
         Recency_avg=('Recency', 'mean'),
         Frequency_avg=('Frequency', 'mean'),
@@ -50,9 +58,38 @@ def cluster_breakdown(rfm_dataset, rfm_clustered):
         Recency_median=('Recency', 'median'),
         Frequency_median=('Frequency', 'median'),
         Monetary_median=('Monetary', 'median'),
-        Cluster_size=('Cluster', 'count')
-    )
+        Cluster_size=('CustomerID', 'count')  # Count customers in each cluster
+    ).reset_index()
     return cluster_summary
+
+def cluster_statistics_visualization(cluster_summary):
+    cluster_summary.reset_index(inplace=True)
+    # Bar chart for Recency
+    recency_fig = px.bar(
+        cluster_summary, x=cluster_summary.index, y='Recency_avg',
+        title="Average Recency by Cluster", labels={"x": "Cluster", "y": "Average Recency"}
+    )
+
+    # Bar chart for Frequency
+    frequency_fig = px.bar(
+        cluster_summary, x=cluster_summary.index, y='Frequency_avg',
+        title="Average Frequency by Cluster", labels={"x": "Cluster", "y": "Average Frequency"}
+    )
+
+    # Bar chart for Monetary
+    monetary_fig = px.bar(
+        cluster_summary, x=cluster_summary.index, y='Monetary_avg',
+        title="Average Monetary Value by Cluster", labels={"x": "Cluster", "y": "Average Monetary Value"}
+    )
+
+    # Cluster sizes (optional)
+    size_fig = px.bar(
+        cluster_summary, x=cluster_summary.index, y='Cluster_size',
+        title="Cluster Sizes", labels={"x": "Cluster", "y": "Number of Customers"}
+    )
+
+    return recency_fig, frequency_fig, monetary_fig, size_fig
+
 
 def time_series_analysis(df):
     time_series = df.set_index('InvoiceDate')['Revenue'].resample('D').sum()
@@ -73,3 +110,79 @@ def top_products(df, n=10):
     top_products = df.groupby('Description')['Revenue'].sum().reset_index()
     top_products = top_products.sort_values(by='Revenue', ascending=False).head(n)
     return top_products
+
+
+def calculate_return_rate(df):
+
+    df['Returned'] = df['Quantity'] < 0  # Assume negative quantity means return
+    return_rate = df['Returned'].value_counts(normalize=True) * 100
+    labels = ['Not Returned', 'Returned']
+
+    fig = go.Figure(data=[go.Pie(labels=labels, values=return_rate, hole=0.5)])
+    return fig
+
+
+def most_returned_products(df, top_n=5):
+
+    returned_products = df[df['Quantity'] < 0]
+    top_returned = (
+        returned_products.groupby('Description')['Quantity']
+        .sum()
+        .abs()
+        .sort_values(ascending=False)
+        .head(top_n)
+    )
+    fig = px.bar(top_returned, x=top_returned.index, y=top_returned.values)
+    fig.update_layout(xaxis_title="Product", yaxis_title="Return Quantity")
+    return fig
+
+
+def average_sales_by_time(df):
+
+    df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'])
+    df['Sales'] = df['Quantity'] * df['UnitPrice']
+
+    # Total Sales for each period
+    total_sales = df['Sales'].sum()
+
+    # Total unique days, weeks, and months in the data
+    total_days = len(df['InvoiceDate'].dt.date.unique())
+    total_weeks = len(df['InvoiceDate'].dt.to_period('W').unique())
+    total_months = len(df['InvoiceDate'].dt.to_period('M').unique())
+
+    # Calculate averages
+    avg_day = total_sales / total_days
+    avg_week = total_sales / total_weeks
+    avg_month = total_sales / total_months
+
+    return avg_day, avg_week, avg_month
+
+
+import plotly.express as px
+
+
+def top_performing_hours(df):
+    # Ensure InvoiceDate is in datetime format
+    df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'])
+
+    # Extract the hour and calculate sales
+    df['Hour'] = df['InvoiceDate'].dt.hour
+    df['Sales'] = df['Quantity'] * df['UnitPrice']
+
+    # Group by hour and aggregate sales
+    sales_by_hour = df.groupby('Hour')['Sales'].sum()
+
+    # Create a mapping for hour labels
+    hour_labels = {0: '12 AM', 1: '1 AM', 2: '2 AM', 3: '3 AM', 4: '4 AM', 5: '5 AM',
+                   6: '6 AM', 7: '7 AM', 8: '8 AM', 9: '9 AM', 10: '10 AM', 11: '11 AM',
+                   12: '12 PM', 13: '1 PM', 14: '2 PM', 15: '3 PM', 16: '4 PM', 17: '5 PM',
+                   18: '6 PM', 19: '7 PM', 20: '8 PM', 21: '9 PM', 22: '10 PM', 23: '11 PM'}
+
+    # Replace numeric hours with meaningful labels
+    sales_by_hour.index = sales_by_hour.index.map(hour_labels)
+
+    # Create the bar chart
+    fig = px.bar(sales_by_hour, x=sales_by_hour.index, y=sales_by_hour.values)
+    fig.update_layout(xaxis_title="Hour of Day", yaxis_title="Total Sales")
+
+    return fig

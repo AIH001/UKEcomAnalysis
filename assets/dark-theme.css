@@ -75,3 +75,48 @@ body {
     border-radius: 10px; /* Rounded corners */
     overflow: hidden; /* Prevent content overflow on rounded corners */
 }
+
+/* Parent card for sales metrics */
+.card-sales-metrics {
+    background-color: rgba(255, 255, 255, 0.1); /* Translucent background */
+    color: #e1e1ff; /* Light purple text */
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3); /* Subtle shadow */
+    padding: 20px;
+    margin: 20px; /* Spacing between cards */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Container for smaller metric cards */
+.sales-metrics-container {
+    display: flex;
+    flex-direction: column; /* Stack child cards vertically */
+    gap: 10px; /* Spacing between smaller cards */
+    width: 100%; /* Ensure full width of parent card */
+}
+
+/* Style for smaller metric cards */
+.metric-card {
+    background-color: #29293d; /* Slightly darker purple */
+    color: #ffffff; /* White text */
+    border-radius: 8px; /* Rounded corners */
+    border: 1px solid #444454;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+    padding: 10px 15px;
+    text-align: center;
+    display: flex; /* Enable flexbox */
+    flex-direction: column; /* Stack text and value vertically */
+    justify-content: center; /* Center content vertically */
+    align-items: center; /* Center content horizontally */
+    width: 80%; /* Full width for vertical stacking */
+    min-height: 80px; /* Consistent height for cards */
+    min-width: 120px; /* Minimum width to maintain usability */
+}
+
+.metric-card:hover {
+    background-color: #383850; /* Slightly lighter purple on hover */
+    transform: scale(1.05); /* Slight zoom effect */
+    transition: all 0.2s ease-in-out; /* Smooth transition */
+}
