@@ -64,31 +64,59 @@ def cluster_breakdown(rfm_combined):
 
 def cluster_statistics_visualization(cluster_summary):
     cluster_summary.reset_index(inplace=True)
+    # Convert cluster_summary.index to string to enforce discrete behavior
+    cluster_summary_reset = cluster_summary.reset_index()  # Reset index for easy access
+    cluster_summary_reset['index'] = cluster_summary_reset['index'].astype(str)  # Convert index to string
+
     # Bar chart for Recency
     recency_fig = px.bar(
-        cluster_summary, x=cluster_summary.index, y='Recency_avg',
-        title="Average Recency by Cluster", labels={"x": "Cluster", "y": "Average Recency"}
+        cluster_summary_reset,
+        x='index',
+        y='Recency_avg',
+        color='index',  # Use the index column for coloring
+        color_discrete_sequence=[
+            '#A7C7E7',
+            '#6082B6',
+            '#87CEEB',
+            '#4682B4'
+        ],
+        title="Average Recency by Cluster",
+        labels={"index": "Cluster", "Recency_avg": "Average Recency"}
     )
 
     # Bar chart for Frequency
     frequency_fig = px.bar(
-        cluster_summary, x=cluster_summary.index, y='Frequency_avg',
-        title="Average Frequency by Cluster", labels={"x": "Cluster", "y": "Average Frequency"}
+        cluster_summary_reset,
+        x='index',
+        y='Frequency_avg',
+        color='index',
+        color_discrete_sequence=[
+            '#A7C7E7',
+            '#6082B6',
+            '#87CEEB',
+            '#4682B4'
+        ],
+        title="Average Frequency by Cluster",
+        labels={"index": "Cluster", "Frequency_avg": "Average Frequency"}
     )
 
     # Bar chart for Monetary
     monetary_fig = px.bar(
-        cluster_summary, x=cluster_summary.index, y='Monetary_avg',
-        title="Average Monetary Value by Cluster", labels={"x": "Cluster", "y": "Average Monetary Value"}
+        cluster_summary_reset,
+        x='index',
+        y='Monetary_avg',
+        color='index',
+        color_discrete_sequence=[
+            '#A7C7E7',
+            '#6082B6',
+            '#87CEEB',
+            '#4682B4'
+        ],
+        title="Average Monetary Value by Cluster",
+        labels={"index": "Cluster", "Monetary_avg": "Average Monetary Value"}
     )
 
-    # Cluster sizes (optional)
-    size_fig = px.bar(
-        cluster_summary, x=cluster_summary.index, y='Cluster_size',
-        title="Cluster Sizes", labels={"x": "Cluster", "y": "Number of Customers"}
-    )
-
-    return recency_fig, frequency_fig, monetary_fig, size_fig
+    return recency_fig, frequency_fig, monetary_fig,
 
 
 def time_series_analysis(df):
@@ -119,12 +147,22 @@ def calculate_return_rate(df):
     labels = ['Not Returned', 'Returned']
 
     fig = go.Figure(data=[go.Pie(labels=labels, values=return_rate, hole=0.5)])
+    fig.update_traces(
+        marker=dict(
+            colors=[
+                '#6082B6',  # Custom dark background for slice 1
+                'red',  # Default red color for slice 3 (or wherever required)
+            ]
+        )
+    )
     return fig
 
 
 def most_returned_products(df, top_n=5):
-
+    # Filter for returned products
     returned_products = df[df['Quantity'] < 0]
+
+    # Aggregate and sort by return quantity
     top_returned = (
         returned_products.groupby('Description')['Quantity']
         .sum()
@@ -132,8 +170,32 @@ def most_returned_products(df, top_n=5):
         .sort_values(ascending=False)
         .head(top_n)
     )
-    fig = px.bar(top_returned, x=top_returned.index, y=top_returned.values)
-    fig.update_layout(xaxis_title="Product", yaxis_title="Return Quantity")
+
+    # Truncate descriptions for x-axis labels
+    truncated_labels = [desc[:15] + "..." if len(desc) > 15 else desc for desc in top_returned.index]
+
+    # Create the bar chart
+    fig = px.bar(
+        top_returned,
+        x=truncated_labels,
+        y=top_returned.values,
+        labels={"x": "Product", "y": "Return Quantity"}
+    )
+
+    # Add hover data with full descriptions
+    fig.update_traces(
+        hovertemplate='<b>Product:</b> %{customdata[0]}<br><b>Return Quantity:</b> %{y}',
+        customdata=[top_returned.index],  # Full descriptions as hover data
+        marker_color="#6082B6"
+    )
+
+    # Customize layout
+    fig.update_layout(
+        xaxis_title="Product",
+        yaxis_title="Return Quantity",
+        xaxis=dict(tickangle=-45),  # Rotate x-axis labels if needed
+    )
+
     return fig
 
 
@@ -157,10 +219,6 @@ def average_sales_by_time(df):
 
     return avg_day, avg_week, avg_month
 
-
-import plotly.express as px
-
-
 def top_performing_hours(df):
     # Ensure InvoiceDate is in datetime format
     df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'])
@@ -183,6 +241,7 @@ def top_performing_hours(df):
 
     # Create the bar chart
     fig = px.bar(sales_by_hour, x=sales_by_hour.index, y=sales_by_hour.values)
+    fig.update_traces(marker_color="#6082B6")
     fig.update_layout(xaxis_title="Hour of Day", yaxis_title="Total Sales")
 
     return fig

@@ -1,12 +1,11 @@
 /* General styling */
 body {
-    background-color: #1e1e2f; /* Dark purple background */
-    color: #e1e1ff; /* Light purple text */
+    background-color: #080808; /* Cod Gray background */
+    color: #e1e1e1; /* Light gray text */
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
 }
-
 /* Vertical navigation panel */
 .nav-panel {
     position: fixed;
@@ -15,7 +14,7 @@ body {
     width: 250px;
     height: 100%;
     background-color: #121212; /* Black for the nav panel */
-    color: #e1e1ff; /* Light purple text */
+    color: #e1e1e1; /* Light purple text */
     display: flex;
     flex-direction: column;
     padding: 20px;
@@ -25,41 +24,28 @@ body {
 .nav-link {
     margin: 10px 0;
     padding: 10px 15px;
-    color: #e1e1ff;
+    color: #e1e1e1;
     text-decoration: none;
     border-radius: 5px;
     transition: background-color 0.3s;
 }
 
 .nav-link:hover {
-    background-color: #29293d; /* Hover effect */
+    background-color: #292929; /* Hover effect */
 }
 
 .nav-link-active {
-    background-color: #444454; /* Active link background */
+    background-color: #3a3a3a; /* Active link background */
 }
 
 /* Grid layout for responsive cards */
 .content {
-    margin-left: 270px; /* Offset for the navigation panel */
+    margin-left: 290px; /* Offset for the navigation panel */
     padding: 20px;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); /* Flexible grid with minimum 400px width */
     grid-auto-rows: auto; /* Automatically adjust row height */
     grid-gap: 20px; /* Spacing between cards */
-}
-
-/* Card styling */
-.card {
-    background-color: rgba(255, 255, 255, 0.1); /* Slightly translucent gray */
-    color: #e1e1ff; /* Light purple text */
-    border-radius: 10px; /* Rounded corners */
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3); /* Subtle shadow */
-    padding: 20px;
-    text-align: center; /* Center content inside the card */
-    display: flex;
-    flex-direction: column; /* Stack card contents vertically */
-    justify-content: space-between; /* Even spacing for content */
 }
 
 /* Larger card for bigger visual displays */
@@ -68,55 +54,74 @@ body {
     min-height: 500px; /* Ensure enough height for larger graphs */
 }
 
-/* Graph container inside cards */
-.card-graph {
-    flex-grow: 1; /* Allow graph to take up available vertical space */
-    min-height: 400px; /* Minimum height for graphs */
-    border-radius: 10px; /* Rounded corners */
-    overflow: hidden; /* Prevent content overflow on rounded corners */
+/* Hover effect for cards */
+.plotly-graph:hover {
+    background-color: #484848; /* Slightly lighter gray on hover */
+    transform: scale(1.02); /* Subtle zoom effect */
+    transition: all 0.2s ease-in-out; /* Smooth transition */
 }
 
-/* Parent card for sales metrics */
-.card-sales-metrics {
-    background-color: rgba(255, 255, 255, 0.1); /* Translucent background */
-    color: #e1e1ff; /* Light purple text */
+/* Graph styling to match card theme */
+.plotly-graph {
+    width: 100%; /* Stretch graph to fill card width */
+    height: 100%; /* Adjust height to fit card */
+    border-radius: 20px; /* Match card border radius */
+    overflow: hidden; /* Prevent content overflow */
+    background-color: #1d2025; /* Match card background */
+}
+
+/* Metrics container for horizontal layout */
+.metrics-container {
+    display: flex;
+    justify-content: space-evenly; /* Distribute metric cards evenly */
+    align-items: center; /* Center-align content vertically */
+    margin-left: 270px; /* Adjust for sidebar */
+    width: calc(100% - 270px); /* Full width excluding sidebar */
+    padding: 20px 0; /* Add vertical padding */
+    background-color: transparent; /* Transparent container */
+}
+
+/* Metric cards */
+.metric-card {
+    background-color: #1d2025;
+    color: #ffffff; /* White text */
     border-radius: 10px; /* Rounded corners */
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3); /* Subtle shadow */
-    padding: 20px;
-    margin: 20px; /* Spacing between cards */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    padding: 20px; /* Add spacing inside cards */
+    text-align: center; /* Center-align content */
+    min-width: 300px; /* Ensure consistent size */
 }
 
-/* Container for smaller metric cards */
-.sales-metrics-container {
-    display: flex;
-    flex-direction: column; /* Stack child cards vertically */
-    gap: 10px; /* Spacing between smaller cards */
-    width: 100%; /* Ensure full width of parent card */
+/* Metric labels */
+.metric-label {
+    font-size: 16px; /* Smaller text for labels */
+    margin-bottom: 5px; /* Spacing below the label */
 }
 
-/* Style for smaller metric cards */
-.metric-card {
-    background-color: #29293d; /* Slightly darker purple */
-    color: #ffffff; /* White text */
-    border-radius: 8px; /* Rounded corners */
-    border: 1px solid #444454;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2); /* Subtle shadow */
-    padding: 10px 15px;
-    text-align: center;
-    display: flex; /* Enable flexbox */
-    flex-direction: column; /* Stack text and value vertically */
-    justify-content: center; /* Center content vertically */
-    align-items: center; /* Center content horizontally */
-    width: 80%; /* Full width for vertical stacking */
-    min-height: 80px; /* Consistent height for cards */
-    min-width: 120px; /* Minimum width to maintain usability */
+/* Metric values */
+.metric-value {
+    font-size: 24px; /* Larger text for the value */
+    font-weight: bold; /* Emphasize the value */
 }
+
+/* Divider Line */
+.divider-line {
+    height: 2px; /* Thickness of the line */
+    background-color: #444454; /* Match the theme color */
+    margin-left: 270px; /* Align with content after sidebar */
+    width: calc(100% - 270px); /* Full width excluding sidebar */
+    margin-top: 10px; /* Add space above */
+    margin-bottom: 20px; /* Add space below */
+}
+
+/* Content below metrics */
+.content {
+    margin-top: 20px; /* Add space between metrics and content */
+}
+
 
 .metric-card:hover {
-    background-color: #383850; /* Slightly lighter purple on hover */
+    background-color: #3f3f3f;
     transform: scale(1.05); /* Slight zoom effect */
     transition: all 0.2s ease-in-out; /* Smooth transition */
 }
