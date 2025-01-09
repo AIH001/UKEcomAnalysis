@@ -2,6 +2,7 @@ import dash
 from dash import dcc, html, Input, Output
 from main import *
 import plotly.express as px
+import os
 
 # Load and analyze data
 df = load_and_prepare_data()
@@ -385,6 +386,7 @@ app.layout = html.Div([
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    port = int(os.environ.get("PORT", 8050))  # Default to 8050 for local testing
+    app.run_server(debug=True, port=port, host='0.0.0.0')
 
 server = app.server
