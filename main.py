@@ -1,13 +1,12 @@
-# eda.py
+# main.py
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.cluster import KMeans
 from statsmodels.tsa.seasonal import seasonal_decompose
 import plotly.express as px
 import plotly.graph_objects as go
-
+from ucimlrepo import fetch_ucirepo
 def load_and_prepare_data():
-    from ucimlrepo import fetch_ucirepo
     online_retail = fetch_ucirepo(id=352)
     ids = online_retail.data['ids']
     X = online_retail.data.features
